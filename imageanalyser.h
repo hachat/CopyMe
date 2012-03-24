@@ -10,6 +10,7 @@ public:
     ImageAnalyser(QObject *parent = 0);
     double compareImage(QImage *drawnImg, QImage *orgImg);
     double correlation(QImage *drawnImg, QImage *orgImg);
+    double correlation(QImage *drawnImg, QImage *orgImg,int offsetX,int offsetY);
 };
 
 #endif // IMAGEANALYSER_H

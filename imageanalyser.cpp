@@ -10,52 +10,84 @@ ImageAnalyser::ImageAnalyser(QObject *parent)
 
 double ImageAnalyser::compareImage(QImage *drawnImg, QImage *orgImg)
 {
-    return correlation(drawnImg, orgImg,20,-20);
+    return optimizedCorrelation(drawnImg,orgImg,50);
+    //return correlation(drawnImg, orgImg,20,-20);
     //return correlation(drawnImg, orgImg);
 }
 
 /**
-  This is the basic correlation function
+  This function will reach the local minima of correlation.
+  Do we need negative values to be considered..??? How they differ..??
+  */
+double ImageAnalyser::optimizedCorrelation(QImage *drawnImg, QImage *orgImg,int steps){
+    int i=0,j=0,n;
+    for(n = 0;n<steps;n++){
+        //orgImg->setPixel(200+i,200+j,qRgb(5,5,5)+orgImg->pixel(200+i,200+j));
+        double value = optimize(drawnImg,orgImg,i,j);
+        if(value == UP){
+            j -=1;
+            qDebug() << "                               Going UP ";
+        }
+        else if(value == DOWN){
+            j +=1;
+            qDebug() << "                               Going DOWN ";
+        }
+        else if(value == LEFT){
+            i -=1;
+            qDebug() << "                               Going LEFT ";
+        }
+        else if(value == RIGHT){
+            i +=1;
+            qDebug() << "                               Going RIGHT ";
+        }
+        else {
+            qDebug() << "                               Staying ";
+            break;
+        }
+        qDebug() << " i: " << i << " j: " << j;
+    }
+    return correlation(drawnImg, orgImg,i,j);
+}
+
+int ImageAnalyser::optimize(QImage *drawnImg, QImage *orgImg,int offsetX,int offsetY){
+
+
+    int min = SELF;
+    double minVal = correlation(drawnImg, orgImg,offsetX,offsetY);
+    qDebug() << " SELF Coorelation: " << minVal;
+    double Val = correlation(drawnImg, orgImg,offsetX,offsetY-1);
+    qDebug() << " UP Coorelation: " << Val;
+    if(minVal > Val){
+        minVal = Val;
+        min = UP;
+    }
+    Val = correlation(drawnImg, orgImg,offsetX,offsetY+1);
+    qDebug() << " DOWN Coorelation: " << Val;
+    if(minVal > Val){
+        minVal = Val;
+        min = DOWN;
+    }
+    Val = correlation(drawnImg, orgImg,offsetX-1,offsetY);
+    qDebug() << " LEFT Coorelation: " << Val;
+    if(minVal > Val){
+        minVal = Val;
+        min = LEFT;
+    }
+    Val = correlation(drawnImg, orgImg,offsetX+1,offsetY);
+    qDebug() << " RIGHT Coorelation: " << Val;
+    if(minVal > Val){
+        minVal = Val;
+        min = RIGHT;
+    }
+    return min;
+}
+
+/**
+  This is the overloaded simple correlation function
   */
 double ImageAnalyser::correlation(QImage *drawnImg, QImage *orgImg)
 {
-    int q,p;
-    long int Ex =0, Ey =0,Ex2sum =0, Ey2sum =0, Exm = 0, Eym = 0,Exysum = 0;
-
-
-        for(p= 0; p<orgImg->width();p++){
-            for(q= 0; q<orgImg->height();q++){
-
-                Exm += qGray(orgImg->pixel(p,q));
-                Eym += qGray(drawnImg->pixel(p,q));
-            }
-        }
-        Exm = Exm/(orgImg->height()*orgImg->width());
-        Eym = Eym/(drawnImg->height()*drawnImg->width());
-
-
-        qDebug() << "Exm " << Exm;
-        qDebug() << "Eym " << Eym;
-        for(p= 0; p<orgImg->width();p++){
-            for(q= 0; q<orgImg->height();q++){
-
-                Ex =  qGray(orgImg->pixel(p, q)) - Exm;
-                Ey =  qGray(drawnImg->pixel(p, q)) - Eym;
-                Ex2sum +=(Ex*Ex);
-                Ey2sum +=(Ey*Ey);
-                Exysum += Ex*Ey;
-            }
-        }
-
-        qDebug() << "Ex2sum " << Ex2sum ;
-        qDebug() << "Ey2sum " << Ey2sum ;
-
-        qDebug() << "Ex2sum " << sqrt((double)Ex2sum) ;
-        qDebug() << "Ey2sum " << sqrt((double)Ey2sum) ;
-        double r = Exysum/(sqrt((double)Ex2sum) * (double)sqrt((double)Ey2sum));
-        qDebug() << "Correlation" << r;
-
-        return r;
+       return correlation(drawnImg,orgImg,0,0);
 }
 
 double ImageAnalyser::correlation(QImage *drawnImg, QImage *orgImg,int offsetX,int offsetY){
@@ -90,8 +122,8 @@ double ImageAnalyser::correlation(QImage *drawnImg, QImage *orgImg,int offsetX,i
             }
         }
 
-        qDebug() << "ExmSum " << Exm;
-        qDebug() << "EymSum " << Eym;
+        //qDebug() << "ExmSum " << Exm;
+        //qDebug() << "EymSum " << Eym;
 
         Exm = Exm/(orgImg->height()*orgImg->width());
         Eym = Eym/(drawnImg->height()*drawnImg->width());
@@ -100,8 +132,8 @@ double ImageAnalyser::correlation(QImage *drawnImg, QImage *orgImg,int offsetX,i
             But it will be enough as those will be equal over each offset
           */
 
-        qDebug() << "Exm " << Exm;
-        qDebug() << "Eym " << Eym;
+        //qDebug() << "Exm " << Exm;
+        //qDebug() << "Eym " << Eym;
 
 
         for(p= 0; p<orgImg->width();p++){
@@ -129,13 +161,13 @@ double ImageAnalyser::correlation(QImage *drawnImg, QImage *orgImg,int offsetX,i
         }
 
 
-        qDebug() << "Ex2sum " << Ex2sum ;
-        qDebug() << "Ey2sum " << Ey2sum ;
+        //qDebug() << "Ex2sum " << Ex2sum ;
+        //qDebug() << "Ey2sum " << Ey2sum ;
 
-        qDebug() << "Ex2sum " << sqrt((double)Ex2sum) ;
-        qDebug() << "Ey2sum " << sqrt((double)Ey2sum) ;
+        //qDebug() << "Ex2sum " << sqrt((double)Ex2sum) ;
+        //qDebug() << "Ey2sum " << sqrt((double)Ey2sum) ;
         double r = Exysum/(sqrt((double)Ex2sum) * (double)sqrt((double)Ey2sum));
-        qDebug() << "Correlation" << r;
+        //qDebug() << "Correlation" << r;
 
         return r;
 

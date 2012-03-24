@@ -32,7 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     PRGRM_NAME = "CopyMe";
 
     drawnImgPtr = drawArea->getImage();
-    drawGrid(drawnImgPtr);
+    //drawGrid(drawnImgPtr);
     connect(compareButton, SIGNAL(clicked()), this, SLOT(compareImage()));
 }
 
@@ -64,7 +64,7 @@ void MainWindow::on_actionLoad_Image_triggered()
              return;
          }
          orgImage = orgImage.scaled(WIDTH,HEIGHT);
-         drawGrid(&orgImage);
+         //drawGrid(&orgImage);
 
          label->setPixmap(QPixmap::fromImage(orgImage));
 
@@ -76,7 +76,7 @@ void MainWindow::on_actionLoad_Image_triggered()
 void MainWindow::on_actionClear_triggered()
 {
     drawArea->clearImage();
-    drawGrid(drawnImgPtr);
+    //drawGrid(drawnImgPtr);
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)

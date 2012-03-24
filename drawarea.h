@@ -6,6 +6,7 @@
 #include <QImage>
 #include <QPoint>
 #include <QWidget>
+#include <qmath.h>
 
 class DrawArea : public QWidget
 {
@@ -23,6 +24,7 @@ public:
     int penWidth() const { return myPenWidth; }
     QImage* getImage();
     void clearImage();
+    QPoint snapPoint(QPoint pnt,bool doSnap = true);
 
 public slots:
 
@@ -42,10 +44,15 @@ private:
 
     bool modified;
     bool scribbling;
+    bool straightLine;
     int myPenWidth;
     QColor myPenColor;
     QImage *image;
     QPoint lastPoint;
+	QPoint tmpPoint;
+    double gridSnap;
+    bool initClick;
+    bool finClick;
 
 };
 

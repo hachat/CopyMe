@@ -21,6 +21,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
+    void drawGrid(QImage *img);
     ~MainWindow();
 protected:
     void resizeEvent(QResizeEvent *event);

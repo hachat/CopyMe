@@ -31,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent) :
     imageAnalyser = new ImageAnalyser(this);
     PRGRM_NAME = "CopyMe";
 
+    drawnImgPtr = drawArea->getImage();
+    drawGrid(drawnImgPtr);
     connect(compareButton, SIGNAL(clicked()), this, SLOT(compareImage()));
 }
 
@@ -62,7 +64,10 @@ void MainWindow::on_actionLoad_Image_triggered()
              return;
          }
          orgImage = orgImage.scaled(WIDTH,HEIGHT);
+         drawGrid(&orgImage);
+
          label->setPixmap(QPixmap::fromImage(orgImage));
+
 
     }
 
@@ -71,6 +76,7 @@ void MainWindow::on_actionLoad_Image_triggered()
 void MainWindow::on_actionClear_triggered()
 {
     drawArea->clearImage();
+    drawGrid(drawnImgPtr);
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -97,6 +103,24 @@ void MainWindow::on_actionSave_triggered()
 
 }
 
+
+void MainWindow::drawGrid(QImage *img)
+{
+    int widthGrid = img->width()/3;
+    int heightGrid = img->height()/3;
+
+    int heightGrid2 = heightGrid *2;
+    int widthGrid2 = widthGrid *2;
+    for(int x = 0; x < img->width(); x++){
+        img->setPixel(x, heightGrid, qRgb(200,200,200));
+        img->setPixel(x, heightGrid2, qRgb(200,200,200));
+    }
+    for(int y = 0; y < img->width(); y++){
+        img->setPixel(widthGrid, y, qRgb(200,200,200));
+        img->setPixel(widthGrid2, y, qRgb(200,200,200));
+    }
+}
+
 void MainWindow::on_actionCompare_triggered()
 {
     compareImage();
@@ -116,3 +140,6 @@ void MainWindow::on_actionClear_2_triggered()
 {
     on_actionClear_triggered();
 }
+
+
+

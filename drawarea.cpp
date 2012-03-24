@@ -10,11 +10,15 @@ DrawArea::DrawArea(int width, int height, QWidget *parent)
     setAttribute(Qt::WA_StaticContents);
     modified = false;
     scribbling = false;
-    myPenWidth = 5;
+    myPenWidth = 10;
     myPenColor = Qt::black;
     image = new QImage(width, height, QImage::Format_RGB16);
     clearImage();
-
+    straightLine = true;
+    gridSnap =5.0;
+    initClick = false;
+    finClick = false;
+	
 }
 //! [0]
 
@@ -81,24 +85,30 @@ void DrawArea::clearImage()
 void DrawArea::mousePressEvent(QMouseEvent *event)
 //! [11] //! [12]
 {
-    if (event->button() == Qt::LeftButton) {
-        lastPoint = event->pos();
+    if (event->button() == Qt::LeftButton && !initClick ) {
+        lastPoint = snapPoint(event->pos());
         scribbling = true;
+        initClick = true;
+        drawLineTo(snapPoint(event->pos()));
+    }else if(event->button() == Qt::LeftButton && initClick ){
+        initClick = false;
+
+        drawLineTo(snapPoint(event->pos()));
     }
 }
 
 void DrawArea::mouseMoveEvent(QMouseEvent *event)
 {
-    if ((event->buttons() & Qt::LeftButton) && scribbling)
-        drawLineTo(event->pos());
+//    if ((event->buttons() & Qt::LeftButton) && scribbling)
+//        drawLineTo(event->pos());
 }
 
 void DrawArea::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton && scribbling) {
-        drawLineTo(event->pos());
-        scribbling = false;
-    }
+//    if (event->button() == Qt::LeftButton && scribbling) {
+//        drawLineTo(event->pos());
+//        scribbling = false;
+//    }
 }
 
 //! [12] //! [13]
@@ -182,4 +192,13 @@ void DrawArea::print()
 QImage* DrawArea::getImage()
 {
     return image;
+}
+QPoint DrawArea::snapPoint(QPoint pnt, bool doSnap)
+{
+    QPoint tmpPoint;
+    if(doSnap){
+        tmpPoint.setX(qFloor(pnt.rx()+gridSnap));
+        tmpPoint.setY(qFloor(pnt.ry()+gridSnap));
+    }
+    return tmpPoint;
 }
